@@ -24,6 +24,7 @@ Roadmap items are hypotheses, not delivery promises.
 - [x] Align workflow identity, exact job names, and repaired step metadata
 - [x] Produce a Markdown evidence bundle
 - [x] Provide CLI help/version output and reject unknown options
+- [x] Enforce source coverage floors in the Node.js 22 CI job
 
 ## Later, only with maintainer evidence
 

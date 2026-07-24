@@ -36,6 +36,12 @@ CLI discovery:
     node src/cli.js --help
     node src/cli.js --version
 
+Node.js 22 or newer can enforce the same source-coverage floor used by CI:
+
+    npm run test:coverage:check
+
+The current minimums are 85% lines, 85% functions, and 80% branches.
+
 JSON output:
 
     node src/cli.js compare test/fixtures/failed.log test/fixtures/passed.log --json

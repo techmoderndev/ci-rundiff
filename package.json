@@ -14,7 +14,8 @@
   "scripts": {
     "check": "node --check src/cli.js && node --check src/compare.js && node --check src/format.js && node --check src/github.js && node --check src/normalize.js && node --check src/steps.js",
     "test": "node --test",
-    "test:coverage": "node --test --experimental-test-coverage"
+    "test:coverage": "node --test --experimental-test-coverage",
+    "test:coverage:check": "node --test --experimental-test-coverage '--test-coverage-include=src/**/*.js' --test-coverage-lines=85 --test-coverage-functions=85 --test-coverage-branches=80"
   },
   "engines": {
     "node": ">=20"

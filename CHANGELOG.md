@@ -28,3 +28,4 @@ Versioning after the first stable public contract.
 - Paired cache evidence requiring a nearby restore before a downstream missing
   dependency and a cache miss in the successful comparison
 - CLI `--version`, explicit option validation, and command-level CLI tests
+- Node.js 22 CI coverage floors for source lines, functions, and branches
