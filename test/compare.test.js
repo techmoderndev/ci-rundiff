@@ -45,3 +45,45 @@ test("prefers a unique failed-test signal over earlier environment differences",
 test("uses unknown when no category rule matches", () => {
   assert.equal(classifyEvidence([{ original: "unexpected output" }]), "unknown");
 });
+
+test("pairs a failed signature verification with successful integrity evidence", () => {
+  const failed = [
+    "Downloading Codecov uploader",
+    "gpg: no valid OpenPGP data found.",
+    "gpg: Can't check signature: No public key",
+    "Could not verify signature",
+    "Process completed with exit code 1",
+  ].join("\n");
+  const passed = [
+    "Downloading Codecov uploader",
+    "gpg: Good signature from Codecov Uploader",
+    "codecov: OK",
+    "CLI integrity verified",
+  ].join("\n");
+
+  const result = compareLogs(failed, passed, { context: 1 });
+  assert.equal(result.strategy, "unique-failure-signal");
+  assert.equal(result.category, "dependency");
+  assert.deepEqual(result.firstDivergence, { failedLine: 2, passedLine: 4 });
+  assert.equal(result.passedEvidence[1].text, "CLI integrity verified");
+});
+
+test("classifies a unique HTTP read timeout as network evidence", () => {
+  const failed = [
+    "Running API tests",
+    "TimeoutError: timed out",
+    "urllib3.exceptions.ReadTimeoutError: Read timed out",
+    "FAILED (errors=1)",
+  ].join("\n");
+  const passed = [
+    "Running API tests",
+    "Ran 103 tests",
+    "OK",
+  ].join("\n");
+
+  const result = compareLogs(failed, passed, { context: 1 });
+  assert.equal(result.strategy, "unique-failure-signal");
+  assert.equal(result.category, "network");
+  assert.deepEqual(result.firstDivergence, { failedLine: 2, passedLine: 3 });
+  assert.equal(result.passedEvidence[1].text, "OK");
+});

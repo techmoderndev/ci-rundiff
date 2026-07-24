@@ -77,6 +77,14 @@ Not included:
 Read [the design note](docs/design.md), [roadmap](ROADMAP.md), and
 [contribution guide](CONTRIBUTING.md) before proposing a large change.
 
+## Public validation
+
+The comparison behavior has been checked against three public fail/pass rerun
+pairs from [Vitest](docs/validation/vitest-run-30004792472.md),
+[Home Assistant](docs/validation/home-assistant-run-29870812002.md), and
+[InvenTree](docs/validation/inventree-run-30080724775.md). The repository keeps
+the evidence notes and public run identifiers, not the full CI logs.
+
 ## Security and privacy
 
 The current CLI reads local files and writes only to standard output. CI logs

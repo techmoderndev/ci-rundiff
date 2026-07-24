@@ -9,7 +9,7 @@ Roadmap items are hypotheses, not delivery promises.
 - [x] Emit exact evidence in text and JSON
 - [x] Classify conservatively, including unknown
 - [x] Validate against first public fail/pass run pair
-- [ ] Validate against two additional public fail/pass run pairs
+- [x] Validate against two additional public fail/pass run pairs
 - [ ] Improve alignment for inserted and removed lines
 
 ## 0.1 — GitHub Actions read-only adapter
