@@ -63,6 +63,12 @@ earliest unique failure signal and pairs it with an exact successful summary
 when available. If no such signal exists, it falls back to the first normalized
 line difference and labels the strategy in the output.
 
+Cache hints use a stricter paired-evidence rule. A downstream missing-command,
+missing-module, archive-integrity, or checksum signal is tagged `cache` only
+when the failed log restored a cache within the preceding 120 lines and the
+successful log explicitly missed the cache. A cache miss by itself is normal
+CI behavior and is not classified as a failure.
+
 ## Trust model
 
 - Input logs remain local.

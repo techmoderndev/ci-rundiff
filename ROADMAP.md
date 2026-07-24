@@ -12,6 +12,7 @@ Roadmap items are hypotheses, not delivery promises.
 - [x] Validate against two additional public fail/pass run pairs
 - [x] Validate a public setup/environment fail/pass run pair
 - [ ] Validate a public cache-service or cache-corruption fail/pass run pair
+- [x] Require paired cache-restore/cache-miss evidence before a cache hint
 - [x] Improve alignment for inserted and removed lines with a bounded fallback
 
 ## 0.1 — GitHub Actions read-only adapter

@@ -82,6 +82,11 @@ Included in the spike:
   and unknown;
 - text and JSON output.
 
+The `cache` hint has an additional guard: a normal cache miss is not a failure.
+For downstream missing-command/module signals, CI RunDiff requires a nearby
+cache restore in the failed log and a cache miss in the successful log. This is
+still observed evidence, not a root-cause claim.
+
 Not included:
 
 - automatic fixes or pull requests;
@@ -110,7 +115,10 @@ toolchain setup rerun from [Deno](docs/validation/deno-run-30007963907.md). The
 repository keeps the evidence notes and public run identifiers, not the full CI
 logs. See the generated-style
 [Deno Markdown evidence bundle](docs/examples/deno-run-30007963907.md) for a
-complete output example.
+complete output example. The
+[cache evidence retention note](docs/validation/cache-evidence-retention-note.md)
+records a public historical pattern, the recent-run scan, and why live cache
+validation remains open.
 
 ## Security and privacy
 

@@ -109,6 +109,68 @@ test("pairs a Windows setup file lock with successful installation evidence", ()
   assert.equal(result.passedEvidence[1].text, "Rust is installed now. Great!");
 });
 
+test("requires paired cache restore and cache miss evidence for a missing command", () => {
+  const failed = [
+    "Run actions/cache@v3",
+    "Cache Size: ~93 MB",
+    "Cache restored successfully",
+    "Cache restored from key: Linux-yarn-old",
+    "Run yarn lint",
+    'error Command "eslint" not found.',
+    "Process completed with exit code 1",
+  ].join("\n");
+  const passed = [
+    "Run actions/cache@v3",
+    "Cache not found for input keys: Linux-yarn-new",
+    "Run yarn install --immutable",
+    "Installed dependencies",
+    "Run yarn lint",
+    "Done in 4.2s",
+  ].join("\n");
+
+  const result = compareLogs(failed, passed, { context: 1 });
+  assert.equal(result.strategy, "unique-failure-signal");
+  assert.equal(result.category, "cache");
+  assert.deepEqual(result.firstDivergence, { failedLine: 6, passedLine: 2 });
+  assert.equal(result.failedEvidence[1].text, 'error Command "eslint" not found.');
+  assert.equal(result.passedEvidence[1].text, "Cache not found for input keys: Linux-yarn-new");
+});
+
+test("does not call an ordinary cache miss a cache failure", () => {
+  const failed = [
+    "Cache not found for input keys: Linux-yarn-new",
+    "Run yarn install",
+    "Process completed with exit code 1",
+  ].join("\n");
+  const passed = [
+    "Cache not found for input keys: Linux-yarn-new",
+    "Run yarn install",
+    "Process completed with exit code 0",
+  ].join("\n");
+
+  assert.notEqual(compareLogs(failed, passed).category, "cache");
+  assert.equal(
+    classifyEvidence([{ original: "Cache not found for input keys: Linux-yarn-new" }]),
+    "unknown",
+  );
+});
+
+test("refuses a distant cache restore as evidence for a missing command", () => {
+  const filler = Array.from({ length: 121 }, (_, index) => `build line ${index + 1}`);
+  const failed = [
+    "Cache restored successfully",
+    ...filler,
+    'error Command "eslint" not found.',
+  ].join("\n");
+  const passed = [
+    "Cache not found for input keys: Linux-yarn-new",
+    "Installed dependencies",
+    "Done in 4.2s",
+  ].join("\n");
+
+  assert.notEqual(compareLogs(failed, passed).category, "cache");
+});
+
 test("preserves original job line numbers for aligned step slices", () => {
   const result = compareLogs(
     "setup\nnpm ERR! ECONNRESET\nexit",
