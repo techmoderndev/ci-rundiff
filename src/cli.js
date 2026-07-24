@@ -28,6 +28,7 @@ function formatText(result, failedPath, passedPath) {
     `Compared: ${basename(failedPath)} ↔ ${basename(passedPath)}`,
     `Same commit: ${result.sameCommit}`,
     `Status: ${result.status}`,
+    `Strategy: ${result.strategy}`,
     `First meaningful divergence: ${divergence}`,
     `Category: ${result.category}`,
     `Confidence: ${result.confidence}`,

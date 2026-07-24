@@ -18,6 +18,7 @@ hosted flaky-test history. CI RunDiff explores a narrower workflow:
 - compare a fail/pass pair;
 - normalize timestamps, runner paths, UUIDs, temporary paths, and ports;
 - show the first meaningful observed difference;
+- prefer an exact failure signal that exists only in the failed log;
 - preserve exact evidence lines;
 - keep all data local.
 
@@ -52,6 +53,7 @@ Included in the spike:
 - local text-log comparison;
 - deterministic normalization;
 - exact failed/passed evidence windows;
+- unique failure-signal detection before raw line divergence;
 - conservative categories: network, dependency, cache, environment, test,
   and unknown;
 - text and JSON output.

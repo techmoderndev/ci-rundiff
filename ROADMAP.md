@@ -8,7 +8,8 @@ Roadmap items are hypotheses, not delivery promises.
 - [x] Normalize common volatile CI values
 - [x] Emit exact evidence in text and JSON
 - [x] Classify conservatively, including unknown
-- [ ] Validate against three public fail/pass run pairs
+- [x] Validate against first public fail/pass run pair
+- [ ] Validate against two additional public fail/pass run pairs
 - [ ] Improve alignment for inserted and removed lines
 
 ## 0.1 — GitHub Actions read-only adapter

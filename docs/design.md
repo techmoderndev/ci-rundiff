@@ -18,9 +18,18 @@ The intended GitHub Actions flow is:
 ## Current spike
 
 The first spike implements steps 5–7 for two local text files. Line comparison
-is intentionally simple and may treat inserted lines as a divergence. Job and
-step alignment belongs in a later adapter and must be validated with public run
-pairs before it is merged.
+first looks for the earliest failure signal that is absent from the successful
+log, then falls back to normalized line divergence. Full job and step alignment
+belongs in a later adapter and must be validated with more public run pairs.
+
+## Evidence selection
+
+Failure-only evidence is preferred over generic environment differences. For
+example, a rerun may use another Azure region, process ID, or timing while the
+decision-relevant evidence is a later test timeout. CI RunDiff reports the
+earliest unique failure signal and pairs it with an exact successful summary
+when available. If no such signal exists, it falls back to the first normalized
+line difference and labels the strategy in the output.
 
 ## Trust model
 

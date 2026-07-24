@@ -14,3 +14,5 @@ Versioning after the first stable public contract.
 - Exact evidence windows
 - Conservative category hints
 - Text and JSON CLI output
+- Unique failure-signal selection before raw normalized divergence
+- First public rerun validation note
