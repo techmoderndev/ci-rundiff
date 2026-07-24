@@ -50,8 +50,86 @@ function findPassedCounterpart(passed, category) {
   return -1;
 }
 
+function findResyncOffset(lines, index, targetLine, lookahead) {
+  if (!targetLine?.normalized) return -1;
+  const anchor = targetLine.normalized.replaceAll("<TIMESTAMP>", "").trim();
+  if (!anchor) return -1;
+  const end = Math.min(lines.length, index + lookahead + 1);
+  for (let candidate = index + 1; candidate < end; candidate += 1) {
+    if (lines[candidate].normalized === targetLine.normalized) {
+      return candidate - index;
+    }
+  }
+  return -1;
+}
+
+function findAlignedDivergence(failed, passed, lookahead) {
+  const firstSharedLength = Math.min(failed.length, passed.length);
+  let firstIndex = 0;
+  while (
+    firstIndex < firstSharedLength
+    && failed[firstIndex].normalized === passed[firstIndex].normalized
+  ) {
+    firstIndex += 1;
+  }
+
+  let failedIndex = firstIndex;
+  let passedIndex = firstIndex;
+  let failedLinesSkipped = 0;
+  let passedLinesSkipped = 0;
+
+  while (failedIndex < failed.length && passedIndex < passed.length) {
+    if (failed[failedIndex].normalized === passed[passedIndex].normalized) {
+      failedIndex += 1;
+      passedIndex += 1;
+      continue;
+    }
+
+    const failedOffset = findResyncOffset(
+      failed,
+      failedIndex,
+      passed[passedIndex],
+      lookahead,
+    );
+    const passedOffset = findResyncOffset(
+      passed,
+      passedIndex,
+      failed[failedIndex],
+      lookahead,
+    );
+
+    if (failedOffset < 0 && passedOffset < 0) break;
+    if (failedOffset >= 0 && passedOffset >= 0) break;
+    if (failedOffset >= 0) {
+      failedIndex += failedOffset;
+      failedLinesSkipped += failedOffset;
+    } else {
+      passedIndex += passedOffset;
+      passedLinesSkipped += passedOffset;
+    }
+  }
+
+  const reachedEnd = failedIndex >= failed.length || passedIndex >= passed.length;
+  if (reachedEnd) {
+    return {
+      failedIndex: firstIndex,
+      passedIndex: firstIndex,
+      alignment: null,
+    };
+  }
+
+  return {
+    failedIndex,
+    passedIndex,
+    alignment: failedLinesSkipped || passedLinesSkipped
+      ? { failedLinesSkipped, passedLinesSkipped, lookahead }
+      : null,
+  };
+}
+
 export function compareLogs(failedText, passedText, options = {}) {
   const context = options.context ?? 2;
+  const alignmentLookahead = options.alignmentLookahead ?? 20;
   const failedLineOffset = options.failedLineOffset ?? 0;
   const passedLineOffset = options.passedLineOffset ?? 0;
   const failed = toLogLines(failedText);
@@ -71,6 +149,7 @@ export function compareLogs(failedText, passedText, options = {}) {
       strategy: "normalized-equality",
       confidence: "observed-difference",
       category: "unknown",
+      alignment: null,
       firstDivergence: null,
       failedEvidence: [],
       passedEvidence: [],
@@ -90,6 +169,7 @@ export function compareLogs(failedText, passedText, options = {}) {
       strategy: "unique-failure-signal",
       confidence: "observed-difference",
       category,
+      alignment: null,
       firstDivergence: {
         failedLine: failed[signalIndex].lineNumber + failedLineOffset,
         passedLine: passedIndex >= 0
@@ -103,18 +183,38 @@ export function compareLogs(failedText, passedText, options = {}) {
     };
   }
 
-  const failedEvidence = evidenceWindow(failed, index, context, failedLineOffset);
-  const passedEvidence = evidenceWindow(passed, index, context, passedLineOffset);
+  const aligned = findAlignedDivergence(failed, passed, alignmentLookahead);
+  const failedIndex = aligned.failedIndex;
+  const passedIndex = aligned.passedIndex;
+  const failedEvidence = evidenceWindow(
+    failed,
+    failedIndex,
+    context,
+    failedLineOffset,
+  );
+  const passedEvidence = evidenceWindow(
+    passed,
+    passedIndex,
+    context,
+    passedLineOffset,
+  );
 
   return {
     sameCommit: "unknown",
     status: "difference-found",
-    strategy: "first-normalized-divergence",
+    strategy: aligned.alignment
+      ? "bounded-line-alignment"
+      : "first-normalized-divergence",
     confidence: "observed-difference",
-    category: classifyEvidence(failed.slice(index, index + context + 3)),
+    category: classifyEvidence(failed.slice(failedIndex, failedIndex + context + 3)),
+    alignment: aligned.alignment,
     firstDivergence: {
-      failedLine: failed[index] ? failed[index].lineNumber + failedLineOffset : null,
-      passedLine: passed[index] ? passed[index].lineNumber + passedLineOffset : null,
+      failedLine: failed[failedIndex]
+        ? failed[failedIndex].lineNumber + failedLineOffset
+        : null,
+      passedLine: passed[passedIndex]
+        ? passed[passedIndex].lineNumber + passedLineOffset
+        : null,
     },
     failedEvidence,
     passedEvidence,

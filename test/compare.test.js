@@ -120,3 +120,77 @@ test("preserves original job line numbers for aligned step slices", () => {
   assert.equal(result.failedEvidence[1].lineNumber, 42);
   assert.equal(result.passedEvidence[1].lineNumber, 82);
 });
+
+test("skips a bounded failed-only insertion before reporting the real divergence", () => {
+  const failed = [
+    "setup",
+    "runner diagnostic only",
+    "install",
+    "unexpected state",
+    "cleanup",
+  ].join("\n");
+  const passed = [
+    "setup",
+    "install",
+    "ready",
+    "cleanup",
+  ].join("\n");
+
+  const result = compareLogs(failed, passed, { context: 0 });
+  assert.equal(result.strategy, "bounded-line-alignment");
+  assert.deepEqual(result.alignment, {
+    failedLinesSkipped: 1,
+    passedLinesSkipped: 0,
+    lookahead: 20,
+  });
+  assert.deepEqual(result.firstDivergence, { failedLine: 4, passedLine: 3 });
+});
+
+test("skips a bounded passed-only insertion before reporting the real divergence", () => {
+  const failed = [
+    "setup",
+    "install",
+    "unexpected state",
+    "cleanup",
+  ].join("\n");
+  const passed = [
+    "setup",
+    "runner diagnostic only",
+    "install",
+    "ready",
+    "cleanup",
+  ].join("\n");
+
+  const result = compareLogs(failed, passed, { context: 0 });
+  assert.equal(result.strategy, "bounded-line-alignment");
+  assert.deepEqual(result.alignment, {
+    failedLinesSkipped: 0,
+    passedLinesSkipped: 1,
+    lookahead: 20,
+  });
+  assert.deepEqual(result.firstDivergence, { failedLine: 3, passedLine: 4 });
+});
+
+test("keeps the first divergence when inserted lines never resynchronize", () => {
+  const result = compareLogs(
+    "setup\nfailed-only trailing detail",
+    "setup",
+    { context: 0 },
+  );
+
+  assert.equal(result.strategy, "first-normalized-divergence");
+  assert.equal(result.alignment, null);
+  assert.deepEqual(result.firstDivergence, { failedLine: 2, passedLine: null });
+});
+
+test("does not guess when both sides have plausible resynchronization anchors", () => {
+  const result = compareLogs(
+    "setup\nalpha\nbeta\ncleanup",
+    "setup\nbeta\nalpha\ncleanup",
+    { context: 0 },
+  );
+
+  assert.equal(result.strategy, "first-normalized-divergence");
+  assert.equal(result.alignment, null);
+  assert.deepEqual(result.firstDivergence, { failedLine: 2, passedLine: 2 });
+});

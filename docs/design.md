@@ -34,6 +34,26 @@ When Actions debug boundaries are present, they narrow the slice further. The
 comparison preserves original job-log line numbers. If usable step metadata is
 not available, comparison falls back to the full matched job.
 
+## Bounded line alignment
+
+After failure-only signals are exhausted, comparison can skip a one-sided
+insertion or removal within a 20-line window and continue at the next exact
+normalized anchor. It refuses to choose when both sides contain plausible
+anchors, when the anchor is only timestamp noise, or when the logs never
+resynchronize. Those cases retain the first normalized divergence.
+
+The JSON and Markdown outputs disclose how many failed and passed lines were
+skipped. This keeps alignment behavior observable instead of presenting it as
+an invisible heuristic.
+
+## Evidence formats
+
+Text remains the interactive default. JSON supports machine processing.
+`--markdown` emits a self-contained bundle with source metadata, a deterministic
+summary table, exact failed and passed evidence, and an explicit statement that
+category labels are not root-cause claims. CI RunDiff writes the bundle to
+standard output and does not create a file implicitly.
+
 ## Evidence selection
 
 Failure-only evidence is preferred over generic environment differences. For
@@ -56,6 +76,7 @@ line difference and labels the strategy in the output.
 
 - `src/normalize.js`: deterministic removal of volatile values
 - `src/compare.js`: divergence detection, evidence windows, conservative tags
+- `src/format.js`: deterministic text and Markdown evidence formatting
 - `src/github.js`: read-only GitHub metadata validation and job-log retrieval
 - `src/steps.js`: repaired-step matching and timestamp-based log slicing
 - `src/cli.js`: command parsing, local file I/O, and output formatting

@@ -12,7 +12,7 @@ Roadmap items are hypotheses, not delivery promises.
 - [x] Validate against two additional public fail/pass run pairs
 - [x] Validate a public setup/environment fail/pass run pair
 - [ ] Validate a public cache-service or cache-corruption fail/pass run pair
-- [ ] Improve alignment for inserted and removed lines
+- [x] Improve alignment for inserted and removed lines with a bounded fallback
 
 ## 0.1 — GitHub Actions read-only adapter
 
@@ -21,7 +21,7 @@ Roadmap items are hypotheses, not delivery promises.
 - [x] Download selected job logs with existing GitHub credentials
 - [x] Match one failed job to its successful rerun by exact name
 - [x] Align workflow identity, exact job names, and repaired step metadata
-- [ ] Produce a Markdown evidence bundle
+- [x] Produce a Markdown evidence bundle
 
 ## Later, only with maintainer evidence
 

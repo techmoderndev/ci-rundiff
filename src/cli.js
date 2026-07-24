@@ -4,43 +4,19 @@ import { readFile } from "node:fs/promises";
 import { basename } from "node:path";
 import process from "node:process";
 import { compareLogs } from "./compare.js";
+import { formatGitHubText, formatMarkdown, formatText } from "./format.js";
 import { compareGitHubRuns } from "./github.js";
 
 const HELP = `ci-rundiff — compare a failed and successful CI log locally
 
 Usage:
-  ci-rundiff compare <failed.log> <passed.log> [--json]
-  ci-rundiff github <owner/repo> <failed-run[@attempt]> <passed-run[@attempt]> [--job <name>] [--step <name>] [--json]
+  ci-rundiff compare <failed.log> <passed.log> [--json | --markdown]
+  ci-rundiff github <owner/repo> <failed-run[@attempt]> <passed-run[@attempt]> [--job <name>] [--step <name>] [--json | --markdown]
   ci-rundiff --help
 
 The github command uses your existing gh CLI credentials, verifies that both
 runs use the same commit, and downloads only the selected job logs. Full logs
 remain in memory and are not written to disk by CI RunDiff.`;
-
-function formatEvidence(lines) {
-  if (lines.length === 0) return "  (none)";
-  return lines.map(({ lineNumber, text }) => `  L${lineNumber}: ${text}`).join("\n");
-}
-
-function formatText(result, failedPath, passedPath) {
-  const divergence = result.firstDivergence
-    ? `failed L${result.firstDivergence.failedLine ?? "EOF"}, passed L${result.firstDivergence.passedLine ?? "EOF"}`
-    : "none";
-
-  return [
-    `Compared: ${basename(failedPath)} ↔ ${basename(passedPath)}`,
-    `Same commit: ${result.sameCommit}`,
-    `Status: ${result.status}`,
-    `Strategy: ${result.strategy}`,
-    `First meaningful divergence: ${divergence}`,
-    `Category: ${result.category}`,
-    `Confidence: ${result.confidence}`,
-    "Failed evidence:",
-    formatEvidence(result.failedEvidence),
-    "Passed evidence:",
-    formatEvidence(result.passedEvidence),
-  ].join("\n");
-}
 
 function optionValue(args, name) {
   const index = args.indexOf(name);
@@ -64,18 +40,10 @@ function positionalArgs(args, valueOptions = []) {
   return values;
 }
 
-function formatGitHubText(result) {
-  const { source } = result;
-  const failedLabel = `${source.failed.runId}@${source.failed.attempt} job ${source.failed.jobId}`;
-  const passedLabel = `${source.passed.runId}@${source.passed.attempt} job ${source.passed.jobId}`;
-  return [
-    `Repository: ${source.repository}`,
-    `Commit: ${source.commitSha}`,
-    `Job: ${source.failed.jobName}`,
-    `Scope: ${source.comparisonScope}`,
-    ...(source.step ? [`Step: ${source.step.name}`] : []),
-    formatText(result, failedLabel, passedLabel),
-  ].join("\n");
+function outputMode(args) {
+  const modes = ["--json", "--markdown"].filter((flag) => args.includes(flag));
+  if (modes.length > 1) throw new Error("Choose only one output mode: --json or --markdown.");
+  return modes[0] ?? "text";
 }
 
 async function main() {
@@ -86,6 +54,7 @@ async function main() {
   }
 
   const command = args[0];
+  const mode = outputMode(args);
 
   if (command === "compare") {
     const paths = positionalArgs(args.slice(1));
@@ -100,12 +69,19 @@ async function main() {
     ]);
     const result = compareLogs(failedText, passedText);
 
-    if (args.includes("--json")) {
+    if (mode === "--json") {
       console.log(JSON.stringify(result, null, 2));
       return;
     }
+    if (mode === "--markdown") {
+      console.log(formatMarkdown(result, {
+        failed: basename(failedPath),
+        passed: basename(passedPath),
+      }));
+      return;
+    }
 
-    console.log(formatText(result, failedPath, passedPath));
+    console.log(formatText(result, basename(failedPath), basename(passedPath)));
     return;
   }
 
@@ -123,8 +99,12 @@ async function main() {
       step: optionValue(args, "--step"),
     });
 
-    if (args.includes("--json")) {
+    if (mode === "--json") {
       console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    if (mode === "--markdown") {
+      console.log(formatMarkdown(result));
       return;
     }
 

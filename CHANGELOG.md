@@ -14,6 +14,9 @@ Versioning after the first stable public contract.
 - Run conclusion, workflow identity, and commit SHA verification before log download
 - Exact repaired-job matching with pagination for workflows over 100 jobs
 - Repaired-step alignment with original job-log line numbers and safe job-level fallback
+- Conservative bounded alignment for one-sided inserted or removed log lines
+- Self-contained Markdown evidence bundles through `--markdown`
+- Public Deno evidence bundle example without retained full logs
 - Deterministic normalization for common CI noise
 - Exact evidence windows
 - Conservative category hints

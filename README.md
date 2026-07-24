@@ -35,6 +35,10 @@ JSON output:
 
     node src/cli.js compare test/fixtures/failed.log test/fixtures/passed.log --json
 
+Markdown evidence bundle:
+
+    node src/cli.js compare test/fixtures/failed.log test/fixtures/passed.log --markdown
+
 Compare two attempts of a public GitHub Actions rerun:
 
     node src/cli.js github denoland/deno 30007963907@1 30007963907@2 \
@@ -71,13 +75,15 @@ Included in the spike:
 - exact failed-to-passed job matching, including workflows with over 100 jobs;
 - repaired-step alignment using GitHub step metadata and original job line
   numbers;
+- bounded insertion/removal alignment with conservative ambiguity fallback;
+- self-contained Markdown evidence output for issues, pull requests, or local
+  records;
 - conservative categories: network, dependency, cache, environment, test,
   and unknown;
 - text and JSON output.
 
 Not included:
 
-- Markdown evidence bundle output;
 - automatic fixes or pull requests;
 - hosted dashboards;
 - external log storage;
@@ -102,7 +108,9 @@ pairs from [Vitest](docs/validation/vitest-run-30004792472.md),
 [InvenTree](docs/validation/inventree-run-30080724775.md), plus a Windows
 toolchain setup rerun from [Deno](docs/validation/deno-run-30007963907.md). The
 repository keeps the evidence notes and public run identifiers, not the full CI
-logs.
+logs. See the generated-style
+[Deno Markdown evidence bundle](docs/examples/deno-run-30007963907.md) for a
+complete output example.
 
 ## Security and privacy
 
