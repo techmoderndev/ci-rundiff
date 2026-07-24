@@ -205,3 +205,58 @@ test("paginates workflows with more than one hundred jobs", async () => {
   assert.equal(result.source.failed.jobName, "repaired");
   assert.ok(requested.some((endpoint) => endpoint.endsWith("page=2")));
 });
+
+test("compares an aligned repaired step while preserving job line numbers", async () => {
+  const failedStep = {
+    number: 3,
+    name: "install",
+    conclusion: "failure",
+    started_at: "2026-07-23T10:00:05Z",
+    completed_at: "2026-07-23T10:00:07Z",
+  };
+  const passedStep = {
+    ...failedStep,
+    conclusion: "success",
+    started_at: "2026-07-23T10:01:05Z",
+    completed_at: "2026-07-23T10:01:07Z",
+  };
+  const github = fakeGitHub({
+    failedJobs: [{
+      id: 11,
+      name: "test",
+      conclusion: "failure",
+      steps: [failedStep],
+    }],
+    passedJobs: [{
+      id: 22,
+      name: "test",
+      conclusion: "success",
+      steps: [passedStep],
+    }],
+  });
+  github.apiText = async (endpoint) => (
+    endpoint.includes("/11/")
+      ? [
+          "2026-07-23T10:00:00.000Z checkout",
+          "2026-07-23T10:00:05.000Z install",
+          "2026-07-23T10:00:06.000Z npm ERR! ECONNRESET",
+          "2026-07-23T10:00:07.000Z exit",
+        ].join("\n")
+      : [
+          "2026-07-23T10:01:00.000Z checkout",
+          "2026-07-23T10:01:05.000Z install",
+          "2026-07-23T10:01:06.000Z packages installed successfully",
+          "2026-07-23T10:01:07.000Z exit",
+        ].join("\n")
+  );
+
+  const result = await compareGitHubRuns({
+    repository: "owner/repo",
+    failed: "100@1",
+    passed: "100@2",
+  }, github);
+
+  assert.equal(result.source.comparisonScope, "step");
+  assert.equal(result.source.step.name, "install");
+  assert.deepEqual(result.firstDivergence, { failedLine: 3, passedLine: 3 });
+});

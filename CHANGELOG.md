@@ -13,6 +13,7 @@ Versioning after the first stable public contract.
 - Read-only GitHub Actions run adapter using existing `gh` credentials
 - Run conclusion, workflow identity, and commit SHA verification before log download
 - Exact repaired-job matching with pagination for workflows over 100 jobs
+- Repaired-step alignment with original job-log line numbers and safe job-level fallback
 - Deterministic normalization for common CI noise
 - Exact evidence windows
 - Conservative category hints

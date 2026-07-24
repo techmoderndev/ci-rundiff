@@ -26,10 +26,13 @@ export function classifyEvidence(lines) {
   return CATEGORY_RULES.find(([, pattern]) => pattern.test(evidence))?.[0] ?? "unknown";
 }
 
-function evidenceWindow(lines, index, context) {
+function evidenceWindow(lines, index, context, lineOffset = 0) {
   const start = Math.max(0, index - context);
   const end = Math.min(lines.length, index + context + 1);
-  return lines.slice(start, end).map(({ lineNumber, original }) => ({ lineNumber, text: original }));
+  return lines.slice(start, end).map(({ lineNumber, original }) => ({
+    lineNumber: lineNumber + lineOffset,
+    text: original,
+  }));
 }
 
 function findUniqueFailureSignal(failed, passed) {
@@ -49,6 +52,8 @@ function findPassedCounterpart(passed, category) {
 
 export function compareLogs(failedText, passedText, options = {}) {
   const context = options.context ?? 2;
+  const failedLineOffset = options.failedLineOffset ?? 0;
+  const passedLineOffset = options.passedLineOffset ?? 0;
   const failed = toLogLines(failedText);
   const passed = toLogLines(passedText);
   const sharedLength = Math.min(failed.length, passed.length);
@@ -86,16 +91,20 @@ export function compareLogs(failedText, passedText, options = {}) {
       confidence: "observed-difference",
       category,
       firstDivergence: {
-        failedLine: failed[signalIndex].lineNumber,
-        passedLine: passedIndex >= 0 ? passed[passedIndex].lineNumber : null,
+        failedLine: failed[signalIndex].lineNumber + failedLineOffset,
+        passedLine: passedIndex >= 0
+          ? passed[passedIndex].lineNumber + passedLineOffset
+          : null,
       },
-      failedEvidence: evidenceWindow(failed, signalIndex, context),
-      passedEvidence: passedIndex >= 0 ? evidenceWindow(passed, passedIndex, context) : [],
+      failedEvidence: evidenceWindow(failed, signalIndex, context, failedLineOffset),
+      passedEvidence: passedIndex >= 0
+        ? evidenceWindow(passed, passedIndex, context, passedLineOffset)
+        : [],
     };
   }
 
-  const failedEvidence = evidenceWindow(failed, index, context);
-  const passedEvidence = evidenceWindow(passed, index, context);
+  const failedEvidence = evidenceWindow(failed, index, context, failedLineOffset);
+  const passedEvidence = evidenceWindow(passed, index, context, passedLineOffset);
 
   return {
     sameCommit: "unknown",
@@ -104,8 +113,8 @@ export function compareLogs(failedText, passedText, options = {}) {
     confidence: "observed-difference",
     category: classifyEvidence(failed.slice(index, index + context + 3)),
     firstDivergence: {
-      failedLine: failed[index]?.lineNumber ?? null,
-      passedLine: passed[index]?.lineNumber ?? null,
+      failedLine: failed[index] ? failed[index].lineNumber + failedLineOffset : null,
+      passedLine: passed[index] ? passed[index].lineNumber + passedLineOffset : null,
     },
     failedEvidence,
     passedEvidence,

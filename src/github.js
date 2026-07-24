@@ -1,6 +1,7 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { compareLogs } from "./compare.js";
+import { findRepairedStepPair, sliceLogForStep } from "./steps.js";
 
 const execFileAsync = promisify(execFile);
 const REPOSITORY_PATTERN = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
@@ -116,6 +117,7 @@ export async function compareGitHubRuns(options, dependencies = {}) {
     failed: failedValue,
     passed: passedValue,
     job: requestedJob,
+    step: requestedStep,
   } = options;
   validateRepository(repository);
 
@@ -155,7 +157,16 @@ export async function compareGitHubRuns(options, dependencies = {}) {
     apiText(`repos/${repository}/actions/jobs/${pair.failed.id}/logs`),
     apiText(`repos/${repository}/actions/jobs/${pair.passed.id}/logs`),
   ]);
-  const result = compareLogs(failedText, passedText);
+  const stepPair = findRepairedStepPair(pair.failed, pair.passed, requestedStep);
+  const failedStepLog = stepPair ? sliceLogForStep(failedText, stepPair.failed) : null;
+  const passedStepLog = stepPair ? sliceLogForStep(passedText, stepPair.passed) : null;
+  const alignedStep = failedStepLog && passedStepLog ? stepPair : null;
+  const result = alignedStep
+    ? compareLogs(failedStepLog.text, passedStepLog.text, {
+        failedLineOffset: failedStepLog.startLine - 1,
+        passedLineOffset: passedStepLog.startLine - 1,
+      })
+    : compareLogs(failedText, passedText);
 
   return {
     ...result,
@@ -165,6 +176,14 @@ export async function compareGitHubRuns(options, dependencies = {}) {
       repository,
       workflowId: failedRun.workflow_id,
       commitSha: failedRun.head_sha,
+      comparisonScope: alignedStep ? "step" : "job",
+      step: alignedStep ? {
+        name: alignedStep.failed.name,
+        failedNumber: alignedStep.failed.number,
+        passedNumber: alignedStep.passed.number,
+        failedLines: [failedStepLog.startLine, failedStepLog.endLine],
+        passedLines: [passedStepLog.startLine, passedStepLog.endLine],
+      } : null,
       failed: {
         runId: failedRun.id,
         attempt: failedRun.run_attempt,

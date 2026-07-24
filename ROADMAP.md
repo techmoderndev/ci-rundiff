@@ -20,7 +20,7 @@ Roadmap items are hypotheses, not delivery promises.
 - [x] Verify repository, workflow identity, run conclusions, and commit SHA equality
 - [x] Download selected job logs with existing GitHub credentials
 - [x] Match one failed job to its successful rerun by exact name
-- [ ] Align workflows, jobs, and steps
+- [x] Align workflow identity, exact job names, and repaired step metadata
 - [ ] Produce a Markdown evidence bundle
 
 ## Later, only with maintainer evidence

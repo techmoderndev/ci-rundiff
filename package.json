@@ -12,7 +12,7 @@
     "README.md"
   ],
   "scripts": {
-    "check": "node --check src/cli.js && node --check src/compare.js && node --check src/github.js && node --check src/normalize.js",
+    "check": "node --check src/cli.js && node --check src/compare.js && node --check src/github.js && node --check src/normalize.js && node --check src/steps.js",
     "test": "node --test",
     "test:coverage": "node --test --experimental-test-coverage"
   },

@@ -10,7 +10,7 @@ const HELP = `ci-rundiff — compare a failed and successful CI log locally
 
 Usage:
   ci-rundiff compare <failed.log> <passed.log> [--json]
-  ci-rundiff github <owner/repo> <failed-run[@attempt]> <passed-run[@attempt]> [--job <name>] [--json]
+  ci-rundiff github <owner/repo> <failed-run[@attempt]> <passed-run[@attempt]> [--job <name>] [--step <name>] [--json]
   ci-rundiff --help
 
 The github command uses your existing gh CLI credentials, verifies that both
@@ -72,6 +72,8 @@ function formatGitHubText(result) {
     `Repository: ${source.repository}`,
     `Commit: ${source.commitSha}`,
     `Job: ${source.failed.jobName}`,
+    `Scope: ${source.comparisonScope}`,
+    ...(source.step ? [`Step: ${source.step.name}`] : []),
     formatText(result, failedLabel, passedLabel),
   ].join("\n");
 }
@@ -108,7 +110,7 @@ async function main() {
   }
 
   if (command === "github") {
-    const positionals = positionalArgs(args.slice(1), ["--job"]);
+    const positionals = positionalArgs(args.slice(1), ["--job", "--step"]);
     if (positionals.length !== 3) {
       throw new Error(`github requires repository, failed run, and passed run\n\n${HELP}`);
     }
@@ -118,6 +120,7 @@ async function main() {
       failed,
       passed,
       job: optionValue(args, "--job"),
+      step: optionValue(args, "--step"),
     });
 
     if (args.includes("--json")) {

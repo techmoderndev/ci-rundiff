@@ -108,3 +108,15 @@ test("pairs a Windows setup file lock with successful installation evidence", ()
   assert.deepEqual(result.firstDivergence, { failedLine: 3, passedLine: 4 });
   assert.equal(result.passedEvidence[1].text, "Rust is installed now. Great!");
 });
+
+test("preserves original job line numbers for aligned step slices", () => {
+  const result = compareLogs(
+    "setup\nnpm ERR! ECONNRESET\nexit",
+    "setup\npackages installed successfully\nexit",
+    { context: 1, failedLineOffset: 40, passedLineOffset: 80 },
+  );
+
+  assert.deepEqual(result.firstDivergence, { failedLine: 42, passedLine: 82 });
+  assert.equal(result.failedEvidence[1].lineNumber, 42);
+  assert.equal(result.passedEvidence[1].lineNumber, 82);
+});

@@ -7,8 +7,7 @@ shows the first observed divergence with exact source lines. It does not upload
 logs, require a test reporter, or claim to know the root cause.
 
 > Project status: early technical spike. File-to-file comparison and a
-> read-only GitHub Actions run adapter work; step-level alignment is not
-> implemented yet.
+> read-only GitHub Actions run adapter with exact job and step alignment work.
 
 ## Why
 
@@ -46,7 +45,8 @@ The GitHub command requires the
 repository. It verifies run conclusions, workflow identity, and commit SHA
 equality, finds a job that changed from failure to success, and downloads only
 those two job logs. If more than one job was repaired, pass its exact name with
-`--job`.
+`--job`. If multiple steps in that job changed from failure to success, select
+one with `--step`.
 
 Expected summary:
 
@@ -69,13 +69,15 @@ Included in the spike:
 - unique failure-signal detection before raw line divergence;
 - read-only GitHub Actions metadata and job-log download through `gh`;
 - exact failed-to-passed job matching, including workflows with over 100 jobs;
+- repaired-step alignment using GitHub step metadata and original job line
+  numbers;
 - conservative categories: network, dependency, cache, environment, test,
   and unknown;
 - text and JSON output.
 
 Not included:
 
-- step-level workflow alignment;
+- Markdown evidence bundle output;
 - automatic fixes or pull requests;
 - hosted dashboards;
 - external log storage;
