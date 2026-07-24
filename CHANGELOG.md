@@ -15,5 +15,6 @@ Versioning after the first stable public contract.
 - Conservative category hints
 - Text and JSON CLI output
 - Unique failure-signal selection before raw normalized divergence
-- Three public rerun validation notes covering test, dependency verification, and network timeout evidence
+- Four public rerun validation notes covering test, dependency verification, network timeout, and setup environment evidence
 - Category-specific successful counterpart evidence for validated dependency and network failures
+- Windows file-lock evidence and a successful setup counterpart

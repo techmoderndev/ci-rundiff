@@ -79,11 +79,13 @@ Read [the design note](docs/design.md), [roadmap](ROADMAP.md), and
 
 ## Public validation
 
-The comparison behavior has been checked against three public fail/pass rerun
+The comparison behavior has been checked against four public fail/pass rerun
 pairs from [Vitest](docs/validation/vitest-run-30004792472.md),
 [Home Assistant](docs/validation/home-assistant-run-29870812002.md), and
-[InvenTree](docs/validation/inventree-run-30080724775.md). The repository keeps
-the evidence notes and public run identifiers, not the full CI logs.
+[InvenTree](docs/validation/inventree-run-30080724775.md), plus a Windows
+toolchain setup rerun from [Deno](docs/validation/deno-run-30007963907.md). The
+repository keeps the evidence notes and public run identifiers, not the full CI
+logs.
 
 ## Security and privacy
 

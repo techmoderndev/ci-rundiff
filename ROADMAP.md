@@ -10,6 +10,8 @@ Roadmap items are hypotheses, not delivery promises.
 - [x] Classify conservatively, including unknown
 - [x] Validate against first public fail/pass run pair
 - [x] Validate against two additional public fail/pass run pairs
+- [x] Validate a public setup/environment fail/pass run pair
+- [ ] Validate a public cache-service or cache-corruption fail/pass run pair
 - [ ] Improve alignment for inserted and removed lines
 
 ## 0.1 — GitHub Actions read-only adapter

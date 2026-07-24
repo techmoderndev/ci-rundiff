@@ -87,3 +87,24 @@ test("classifies a unique HTTP read timeout as network evidence", () => {
   assert.deepEqual(result.firstDivergence, { failedLine: 2, passedLine: 3 });
   assert.equal(result.passedEvidence[1].text, "OK");
 });
+
+test("pairs a Windows setup file lock with successful installation evidence", () => {
+  const failed = [
+    "Starting: Pre-install rustup 1.28.2",
+    "Detected broken rustup 1.29.0, replacing with 1.28.2",
+    "error: could not remove rustup.exe: The process cannot access the file because it is being used by another process. (os error 32)",
+    "Process completed with exit code 1",
+  ].join("\n");
+  const passed = [
+    "Starting: Pre-install rustup 1.28.2",
+    "Detected broken rustup 1.29.0, replacing with 1.28.2",
+    "info: skipping toolchain installation",
+    "Rust is installed now. Great!",
+  ].join("\n");
+
+  const result = compareLogs(failed, passed, { context: 1 });
+  assert.equal(result.strategy, "unique-failure-signal");
+  assert.equal(result.category, "environment");
+  assert.deepEqual(result.firstDivergence, { failedLine: 3, passedLine: 4 });
+  assert.equal(result.passedEvidence[1].text, "Rust is installed now. Great!");
+});

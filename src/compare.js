@@ -4,17 +4,19 @@ const CATEGORY_RULES = [
   ["network", /\b(?:ECONNRESET|ETIMEDOUT|ENOTFOUND|EAI_AGAIN|DNS|TLS|certificate|socket hang up|TimeoutError|ReadTimeoutError|Read timed out)\b/i],
   ["dependency", /(?:npm ERR!|ERR_PNPM|dependency resolution|could not resolve|no matching distribution|registry\.|no valid OpenPGP data|No public key|Could not verify signature)/i],
   ["cache", /\b(?:cache miss|cache hit|restore key|failed to restore cache|corrupt cache)\b/i],
-  ["environment", /(?:permission denied|EACCES|command not found|no such file or directory|runner image)/i],
+  ["environment", /(?:permission denied|EACCES|command not found|no such file or directory|runner image|being used by another process|os error 32)/i],
   ["test", /(?:AssertionError|Test failed|Tests? failed|\b\d+\s+failed\b|Expected:|Received:|\bFAIL\b)/i],
 ];
 
-const FAILURE_SIGNAL = /(?:##\[error\]|AssertionError|Test failed|Tests? failed|\b\d+\s+failed\b|npm ERR!|ERR_PNPM|ELIFECYCLE|ECONNRESET|ETIMEDOUT|ENOTFOUND|EAI_AGAIN|TimeoutError|ReadTimeoutError|Read timed out|no valid OpenPGP data|No public key|Could not verify signature|permission denied|EACCES|command not found|Process completed with exit code [1-9]\d*)/i;
+const FAILURE_SIGNAL = /(?:##\[error\]|AssertionError|Test failed|Tests? failed|\b\d+\s+failed\b|npm ERR!|ERR_PNPM|ELIFECYCLE|ECONNRESET|ETIMEDOUT|ENOTFOUND|EAI_AGAIN|TimeoutError|ReadTimeoutError|Read timed out|no valid OpenPGP data|No public key|Could not verify signature|permission denied|EACCES|command not found|being used by another process|os error 32|Process completed with exit code [1-9]\d*)/i;
 const TEST_PASS_SUMMARY = /(?:Test Files|Tests)\s+.*\b\d+\s+passed\b/i;
 const NETWORK_PASS_SUMMARY = /(?:^|[\s>])OK\s*$/i;
 const DEPENDENCY_PASS_SUMMARY = /(?:Good signature|CLI integrity verified|codecov:\s*OK)/i;
+const ENVIRONMENT_PASS_SUMMARY = /(?:Rust is installed now|toolchain installed|setup completed)/i;
 const GENERAL_PASS_SUMMARY = /(?:Process completed with exit code 0|conclusion=success|\b(?:success|succeeded)\b)/i;
 const PASS_SUMMARIES = {
   dependency: DEPENDENCY_PASS_SUMMARY,
+  environment: ENVIRONMENT_PASS_SUMMARY,
   network: NETWORK_PASS_SUMMARY,
   test: TEST_PASS_SUMMARY,
 };
