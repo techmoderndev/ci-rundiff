@@ -1,22 +1,40 @@
 #!/usr/bin/env node
 
 import { readFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { basename } from "node:path";
 import process from "node:process";
 import { compareLogs } from "./compare.js";
 import { formatGitHubText, formatMarkdown, formatText } from "./format.js";
 import { compareGitHubRuns } from "./github.js";
 
+const { version: VERSION } = createRequire(import.meta.url)("../package.json");
 const HELP = `ci-rundiff — compare a failed and successful CI log locally
 
 Usage:
   ci-rundiff compare <failed.log> <passed.log> [--json | --markdown]
   ci-rundiff github <owner/repo> <failed-run[@attempt]> <passed-run[@attempt]> [--job <name>] [--step <name>] [--json | --markdown]
   ci-rundiff --help
+  ci-rundiff --version
 
 The github command uses your existing gh CLI credentials, verifies that both
 runs use the same commit, and downloads only the selected job logs. Full logs
 remain in memory and are not written to disk by CI RunDiff.`;
+
+function assertKnownOptions(args, allowed, valueOptions = []) {
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (!arg.startsWith("-")) continue;
+    if (!allowed.includes(arg)) throw new Error(`Unknown option: ${arg}`);
+    if (valueOptions.includes(arg)) {
+      const value = args[index + 1];
+      if (!value || value.startsWith("-")) {
+        throw new Error(`${arg} requires a value`);
+      }
+      index += 1;
+    }
+  }
+}
 
 function optionValue(args, name) {
   const index = args.indexOf(name);
@@ -52,11 +70,16 @@ async function main() {
     console.log(HELP);
     return;
   }
+  if (args.includes("--version") || args.includes("-V")) {
+    console.log(VERSION);
+    return;
+  }
 
   const command = args[0];
   const mode = outputMode(args);
 
   if (command === "compare") {
+    assertKnownOptions(args.slice(1), ["--json", "--markdown"]);
     const paths = positionalArgs(args.slice(1));
     if (paths.length !== 2) {
       throw new Error(`compare requires exactly two log files\n\n${HELP}`);
@@ -86,6 +109,11 @@ async function main() {
   }
 
   if (command === "github") {
+    assertKnownOptions(
+      args.slice(1),
+      ["--job", "--step", "--json", "--markdown"],
+      ["--job", "--step"],
+    );
     const positionals = positionalArgs(args.slice(1), ["--job", "--step"]);
     if (positionals.length !== 3) {
       throw new Error(`github requires repository, failed run, and passed run\n\n${HELP}`);

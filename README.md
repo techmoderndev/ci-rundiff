@@ -31,6 +31,11 @@ Requirements: Node.js 20 or newer. There are no runtime dependencies.
     npm test
     node src/cli.js compare test/fixtures/failed.log test/fixtures/passed.log
 
+CLI discovery:
+
+    node src/cli.js --help
+    node src/cli.js --version
+
 JSON output:
 
     node src/cli.js compare test/fixtures/failed.log test/fixtures/passed.log --json

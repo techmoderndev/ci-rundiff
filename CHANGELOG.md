@@ -27,3 +27,4 @@ Versioning after the first stable public contract.
 - Windows file-lock evidence and a successful setup counterpart
 - Paired cache evidence requiring a nearby restore before a downstream missing
   dependency and a cache miss in the successful comparison
+- CLI `--version`, explicit option validation, and command-level CLI tests

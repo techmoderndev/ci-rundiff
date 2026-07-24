@@ -23,6 +23,7 @@ Roadmap items are hypotheses, not delivery promises.
 - [x] Match one failed job to its successful rerun by exact name
 - [x] Align workflow identity, exact job names, and repaired step metadata
 - [x] Produce a Markdown evidence bundle
+- [x] Provide CLI help/version output and reject unknown options
 
 ## Later, only with maintainer evidence
 
