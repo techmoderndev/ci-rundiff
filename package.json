@@ -1,0 +1,42 @@
+{
+  "name": "@techmoderndev/ci-rundiff",
+  "version": "0.0.1",
+  "description": "Local-first evidence for GitHub Actions runs that fail and then pass on rerun.",
+  "type": "module",
+  "bin": {
+    "ci-rundiff": "./src/cli.js"
+  },
+  "files": [
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "check": "node --check src/cli.js && node --check src/compare.js && node --check src/normalize.js",
+    "test": "node --test",
+    "test:coverage": "node --test --experimental-test-coverage"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/techmoderndev/ci-rundiff.git"
+  },
+  "bugs": {
+    "url": "https://github.com/techmoderndev/ci-rundiff/issues"
+  },
+  "homepage": "https://github.com/techmoderndev/ci-rundiff#readme",
+  "keywords": [
+    "ci",
+    "github-actions",
+    "flaky-builds",
+    "logs",
+    "devtools"
+  ],
+  "author": "techmoderndev",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  }
+}

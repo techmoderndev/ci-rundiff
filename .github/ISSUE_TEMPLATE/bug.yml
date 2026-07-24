@@ -1,0 +1,36 @@
+name: Bug report
+description: Report incorrect comparison or output.
+title: "[Bug]: "
+labels: [bug, triage]
+body:
+  - type: markdown
+    attributes:
+      value: Remove secrets and personal data before sharing any CI log.
+  - type: input
+    id: version
+    attributes:
+      label: CI RunDiff version
+      placeholder: 0.0.1 or commit SHA
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: What happened?
+      description: Describe the observed and expected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Provide sanitized failed/passed snippets when safe.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed secrets, tokens, and personal data.
+          required: true
