@@ -10,6 +10,9 @@ Versioning after the first stable public contract.
 ### Added
 
 - Local failed/passed log comparison
+- Read-only GitHub Actions run adapter using existing `gh` credentials
+- Run conclusion, workflow identity, and commit SHA verification before log download
+- Exact repaired-job matching with pagination for workflows over 100 jobs
 - Deterministic normalization for common CI noise
 - Exact evidence windows
 - Conservative category hints

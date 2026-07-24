@@ -6,8 +6,9 @@ CI RunDiff compares failed and successful logs, removes common CI noise, and
 shows the first observed divergence with exact source lines. It does not upload
 logs, require a test reporter, or claim to know the root cause.
 
-> Project status: early technical spike. The file-to-file comparison works;
-> direct GitHub Actions run-ID support is not implemented yet.
+> Project status: early technical spike. File-to-file comparison and a
+> read-only GitHub Actions run adapter work; step-level alignment is not
+> implemented yet.
 
 ## Why
 
@@ -35,6 +36,18 @@ JSON output:
 
     node src/cli.js compare test/fixtures/failed.log test/fixtures/passed.log --json
 
+Compare two attempts of a public GitHub Actions rerun:
+
+    node src/cli.js github denoland/deno 30007963907@1 30007963907@2 \
+      --job "test specs (1/2) debug windows-x86_64"
+
+The GitHub command requires the
+[GitHub CLI](https://cli.github.com/) with credentials that can read the
+repository. It verifies run conclusions, workflow identity, and commit SHA
+equality, finds a job that changed from failure to success, and downloads only
+those two job logs. If more than one job was repaired, pass its exact name with
+`--job`.
+
 Expected summary:
 
     Same commit: unknown
@@ -43,8 +56,8 @@ Expected summary:
     Confidence: observed-difference
 
 The CLI reports `Same commit: unknown` for local files because raw logs do not
-contain trusted run metadata. A future GitHub Actions adapter will verify SHA
-equality before comparison.
+contain trusted run metadata. The GitHub command reports `yes` only after
+verifying SHA equality through run metadata.
 
 ## Current scope
 
@@ -54,13 +67,15 @@ Included in the spike:
 - deterministic normalization;
 - exact failed/passed evidence windows;
 - unique failure-signal detection before raw line divergence;
+- read-only GitHub Actions metadata and job-log download through `gh`;
+- exact failed-to-passed job matching, including workflows with over 100 jobs;
 - conservative categories: network, dependency, cache, environment, test,
   and unknown;
 - text and JSON output.
 
 Not included:
 
-- GitHub authentication or run download;
+- step-level workflow alignment;
 - automatic fixes or pull requests;
 - hosted dashboards;
 - external log storage;
@@ -89,9 +104,11 @@ logs.
 
 ## Security and privacy
 
-The current CLI reads local files and writes only to standard output. CI logs
-can contain secrets even after platform masking, so review output before
-sharing it. Report security issues according to [SECURITY.md](SECURITY.md).
+The CLI reads local files or downloads selected job logs through the existing
+`gh` authentication context. Downloaded logs stay in process memory; CI RunDiff
+does not persist or upload them. CI logs can contain secrets even after
+platform masking, so review evidence output before sharing it. Report security
+issues according to [SECURITY.md](SECURITY.md).
 
 ## License
 

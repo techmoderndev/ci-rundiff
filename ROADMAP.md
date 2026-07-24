@@ -16,9 +16,10 @@ Roadmap items are hypotheses, not delivery promises.
 
 ## 0.1 — GitHub Actions read-only adapter
 
-- [ ] Accept failed and passed run IDs
-- [ ] Verify repository and commit SHA equality
-- [ ] Download logs with existing GitHub credentials
+- [x] Accept failed and passed run IDs with optional attempt numbers
+- [x] Verify repository, workflow identity, run conclusions, and commit SHA equality
+- [x] Download selected job logs with existing GitHub credentials
+- [x] Match one failed job to its successful rerun by exact name
 - [ ] Align workflows, jobs, and steps
 - [ ] Produce a Markdown evidence bundle
 

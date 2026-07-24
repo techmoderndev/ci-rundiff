@@ -17,10 +17,18 @@ The intended GitHub Actions flow is:
 
 ## Current spike
 
-The first spike implements steps 5–7 for two local text files. Line comparison
-first looks for the earliest failure signal that is absent from the successful
-log, then falls back to normalized line divergence. Full job and step alignment
-belongs in a later adapter and must be validated with more public run pairs.
+The local comparison implements steps 5–7 for two text files. The GitHub
+adapter implements steps 1–3 and exact job-name matching for a failure that
+becomes successful. Line comparison first looks for the earliest failure signal
+that is absent from the successful log, then falls back to normalized line
+divergence.
+
+Run specifications use `RUN_ID@ATTEMPT`. This supports GitHub's rerun model,
+where attempts share a run ID, and also permits two distinct run IDs when they
+share a commit. If multiple jobs change from failure to success, the adapter
+requires an exact `--job` name instead of guessing.
+
+Full step alignment remains future work.
 
 ## Evidence selection
 
@@ -44,7 +52,8 @@ line difference and labels the strategy in the output.
 
 - `src/normalize.js`: deterministic removal of volatile values
 - `src/compare.js`: divergence detection, evidence windows, conservative tags
-- `src/cli.js`: local file I/O and output formatting
+- `src/github.js`: read-only GitHub metadata validation and job-log retrieval
+- `src/cli.js`: command parsing, local file I/O, and output formatting
 
-Future GitHub-specific code should live behind an adapter so the comparison
-core remains provider-independent and testable without network access.
+GitHub-specific code stays behind an injected API boundary so the comparison
+core and adapter behavior remain testable without network access.
